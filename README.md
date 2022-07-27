@@ -1,18 +1,17 @@
-# opengl-learning
+# OpenGL learning
 
 ## Docker installation and usage
 
-There is a `Dockerfile` with all necessary dependencies for CMake, OpenGL,
-X11, and GLFW in `docker` directory.
+There is a [Dockerfile](docker/Dockerfile) with all necessary dependencies for CMake, OpenGL, X11, and GLFW in [docker](docker/) directory.
 
-Build an image with
+Build the image with
 
 ```bash
 cd docker
 docker build -t glfw-cpp:latest .
 ```
 
-Run a docker container with
+Run the docker container with
 
 ```bash
 ./run-docker.sh
