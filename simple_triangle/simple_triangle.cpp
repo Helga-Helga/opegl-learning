@@ -1,6 +1,9 @@
 #include <cstdlib>
 #include <cstdio>
+#include <fstream>
 #include <iostream>
+#include <iterator>
+#include <string>
 
 #include <GLFW/glfw3.h>
 #include <GLES3/gl3.h>
@@ -11,19 +14,8 @@ float points[] = {
     -0.5f, -0.5f, 0.0f
 };
 
-const char* vertex_shader =
-"#version 400\n"
-"in vec3 vp;"
-"void main() {"
-"    gl_Position = vec4(vp, 1.0);"
-"}";
-
-const char* fragment_shader =
-"#version 400\n"
-"out vec4 frag_colour;"
-"void main() {"
-"    frag_colour = vec4(0.5, 0.0, 0.5, 1.0);"
-"}";
+const std::string vertex_shader_path{"../shaders/vertex_shader.glsl"};
+const std::string fragment_shader_path{"../shaders/fragment_shader.glsl"};
 
 void error_callback(int error, const char* description)
 {
@@ -38,13 +30,25 @@ static void key_callback(GLFWwindow* window, int key, int scancode, int action, 
     }
 }
 
+std::string readFile(const std::string& path)
+{
+    std::ifstream input_file{path};
+    if (!input_file.is_open())
+    {
+        std::cerr << "Could not open file '" << path << "'" << std::endl;
+        exit(EXIT_FAILURE);
+    }
+
+    return std::string((std::istreambuf_iterator<char>(input_file)), std::istreambuf_iterator<char>());
+}
+
 int main()
 {
     glfwSetErrorCallback(error_callback);
 
     if (!glfwInit())
     {
-        std::cout << "GLFW library initialization failed" << std::endl;;
+        std::cerr << "GLFW library initialization failed" << std::endl;;
         exit(EXIT_FAILURE);
     }
 
@@ -54,7 +58,7 @@ int main()
     GLFWwindow* window = glfwCreateWindow(640, 480, "Simple Triangle", NULL, NULL);
     if (window == nullptr)
     {
-        std::cout << "Window or OpenGL context creation failed." << std::endl;
+        std::cerr << "Window or OpenGL context creation failed." << std::endl;
         glfwTerminate();
         exit(EXIT_FAILURE);
     }
@@ -77,10 +81,14 @@ int main()
     // make vec3 from every 3 floats in the buffer.
     glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, NULL);
 
+    std::string vertex_shader_string = readFile(vertex_shader_path);
+    const char* vertex_shader = vertex_shader_string.c_str();
     GLuint vs = glCreateShader(GL_VERTEX_SHADER);
     glShaderSource(vs, 1, &vertex_shader, NULL);
     glCompileShader(vs);
 
+    std::string fragment_shader_string = readFile(fragment_shader_path);
+    const char* fragment_shader = fragment_shader_string.c_str();
     GLuint fs = glCreateShader(GL_FRAGMENT_SHADER);
     glShaderSource(fs, 1, &fragment_shader, NULL);
     glCompileShader(fs);
